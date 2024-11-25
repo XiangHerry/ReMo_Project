@@ -1,0 +1,158 @@
+const express = require('express');
+const { MongoClient } = require('mongodb');
+const cors = require('cors');
+
+const app = express();
+const port = 5001; // 修改端口号
+
+// 使用 CORS 中间件
+app.use(cors()); // 允许所有来源访问（可根据需要限制来源）
+
+// MongoDB 连接
+const uri = 'mongodb+srv://zongyuwu97:pNuh2yzOKvsXa8D0@final.qgzb33l.mongodb.net/'; // 替换为你的 MongoDB URI
+const client = new MongoClient(uri);
+let databases = {};
+
+// 初始化 MongoDB 连接
+async function connectToDatabase() {
+    try {
+        await client.connect();
+        databases.bookDatabase = client.db('bookDatabase');
+        databases.creatorDatabase = client.db('creatorDatabase');
+        databases.libraryDatabase = client.db('libraryDatabase');
+        console.log('Connected to MongoDB');
+    } catch (err) {
+        console.error('Failed to connect to MongoDB:', err);
+        process.exit(1); // 如果无法连接数据库，退出进程
+    }
+}
+
+// 中间件
+app.use(express.json());
+
+// 测试 API
+app.get('/test', (req, res) => {
+    res.send('Server and MongoDB are working fine');
+});
+
+// 获取书籍列表
+app.get('/books', async (req, res) => {
+    try {
+        const { title } = req.query;
+        const collection = databases.bookDatabase.collection('books');
+
+        // 按标题搜索或返回默认记录
+        const query = title ? { title: { $regex: title, $options: "i" } } : {};
+        const books = await collection.find(query).limit(title ? 0 : 10).toArray();
+
+        res.json(books.map(book => ({
+            title: book.title || "Unknown Title",
+            isbn: book.isbn || [],
+            authors: book.authors || [],
+        })));
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// 添加新书
+app.post('/books', async (req, res) => {
+    try {
+        const { title, isbn, authors } = req.body;
+        if (!title || !isbn || !authors) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+        const collection = databases.bookDatabase.collection('books');
+        const result = await collection.insertOne({ title, isbn, authors });
+        res.status(201).json(result.ops[0]);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// 获取创作者列表
+app.get('/creators', async (req, res) => {
+    try {
+        const { name } = req.query;
+        const collection = databases.creatorDatabase.collection('creators');
+
+        // 按名称搜索或返回默认记录
+        const query = name ? { name: { $regex: name, $options: "i" } } : {};
+        const creators = await collection.find(query).limit(name ? 0 : 10).toArray();
+
+        res.json(creators.map(creator => ({
+            name: creator.name || "Unknown Name",
+            works: creator.works || [],
+        })));
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// 获取图书馆列表
+app.get('/libraries', async (req, res) => {
+    try {
+        const { name } = req.query;
+        const collection = databases.libraryDatabase.collection('libraries');
+
+        // 构造查询逻辑
+        const query = name ? { title: { $regex: name, $options: "i" } } : {};
+        const libraries = await collection.find(query).limit(name ? 0 : 10).toArray();
+
+        res.json(libraries.map(library => ({
+            title: library.title || "No Title Available",
+            material_type: library.material_type || "Unknown",
+            inventory: library.inventory
+                ? {
+                    total_copies: library.inventory.total_copies || 0,
+                    copies_available: library.inventory.copies_available || 0,
+                    copies_checked_out: library.inventory.copies_checked_out || 0,
+                    copies_lost: library.inventory.copies_lost || 0,
+                }
+                : null,
+        })));
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// 添加新图书馆
+app.post('/libraries', async (req, res) => {
+    try {
+        const { title, material_type, inventory } = req.body;
+
+        // 校验必需字段
+        if (!title || !material_type || !inventory) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // 确保 `inventory` 包含必要字段
+        const processedInventory = {
+            total_copies: inventory.total_copies || 0,
+            copies_available: inventory.copies_available || 0,
+            copies_checked_out: inventory.copies_checked_out || 0,
+            copies_lost: inventory.copies_lost || 0,
+        };
+
+        // 插入数据到数据库
+        const collection = databases.libraryDatabase.collection('libraries');
+        const result = await collection.insertOne({
+            title,
+            material_type,
+            inventory: processedInventory,
+        });
+
+        // 返回插入的数据
+        res.status(201).json(result.ops[0]);
+    } catch (err) {
+        console.error("Error adding library:", err);
+        res.status(500).send(err.message);
+    }
+});
+
+
+// 启动服务器
+app.listen(port, async () => {
+    await connectToDatabase();
+    console.log(`Server running on http://localhost:${port}`);
+});

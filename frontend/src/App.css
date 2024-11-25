@@ -1,0 +1,57 @@
+/* 全局样式 */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* 浅灰背景色 */
+    color: #333;
+  }
+  
+  .app-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* 导航栏样式 */
+  .navbar {
+    background-color: #007bff; /* 蓝色背景 */
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .nav-list {
+    list-style-type: none;
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .nav-item {}
+  
+  .nav-link {
+    text-decoration: none;
+    color: #fff; /* 白色文字 */
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .nav-link:hover {
+    background-color: #0056b3; /* 悬停时的背景色 */
+  }
+  
+  /* 内容区域样式 */
+  .content {
+    background: #fff; /* 白色背景 */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
