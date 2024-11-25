@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 5001; // 使用环境变量中的端口，Render 会自动分配端口
 
 // 使用 CORS 中间件
-const allowedOrigins = ['https://your-netlify-site.netlify.app']; // 替换为您的 Netlify 前端域名
+const allowedOrigins = ['https://ephemeral-biscotti-5b60bd.netlify.app']; 
 app.use(cors({
     origin: function(origin, callback){
         // 允许无来源（如 Postman）
