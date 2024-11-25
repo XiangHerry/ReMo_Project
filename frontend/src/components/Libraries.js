@@ -72,15 +72,15 @@ function Libraries() {
         <ul style={styles.list}>
           {libraries.map((library, index) => (
             <li key={index} style={styles.listItem}>
-              <strong>Library Name:</strong> {library.title ?? "Not Specified"} <br />
-              <strong>Material Type:</strong> {library.material_type ?? "Not Specified"} <br />
+              <strong>Library Name:</strong> {library.title || "Not Specified"} <br />
+              <strong>Material Type:</strong> {library.material_type || "Unknown"} <br />
               <strong>Inventory:</strong>
               {library.inventory ? (
                 <ul>
-                  <li>Total Copies: {library.inventory.total_copies ?? "N/A"}</li>
-                  <li>Copies Available: {library.inventory.copies_available ?? "N/A"}</li>
-                  <li>Copies Checked Out: {library.inventory.copies_checked_out ?? "N/A"}</li>
-                  <li>Copies Lost: {library.inventory.copies_lost ?? "N/A"}</li>
+                  <li>Total Copies: {library.inventory.total_copies || "N/A"}</li>
+                  <li>Copies Available: {library.inventory.copies_available || "N/A"}</li>
+                  <li>Copies Checked Out: {library.inventory.copies_checked_out || "N/A"}</li>
+                  <li>Copies Lost: {library.inventory.copies_lost || "N/A"}</li>
                 </ul>
               ) : (
                 "No Inventory Data Available"
