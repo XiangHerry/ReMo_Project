@@ -89,7 +89,7 @@ function Libraries() {
           ))}
         </ul>
       ) : showResults && libraries.length === 0 ? (
-        <p style={styles.noResult}>No libraries found for your search.</p> {/* 搜索为空时的提示 */}
+        <p style={styles.noResult}>No libraries found for your search.</p> 
       ) : null}
 
       {/* 添加新记录功能 */}
