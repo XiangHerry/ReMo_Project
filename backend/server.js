@@ -3,13 +3,27 @@ const { MongoClient } = require('mongodb');
 const cors = require('cors');
 
 const app = express();
-const port = 5001; // 修改端口号
+const port = process.env.PORT || 5001; // 使用环境变量中的端口，Render 会自动分配端口
 
 // 使用 CORS 中间件
-app.use(cors()); // 允许所有来源访问（可根据需要限制来源）
+const allowedOrigins = ['https://your-netlify-site.netlify.app']; // 替换为您的 Netlify 前端域名
+app.use(cors({
+    origin: function(origin, callback){
+        // 允许无来源（如 Postman）
+        if(!origin) return callback(null, true);
+        if(allowedOrigins.indexOf(origin) === -1){
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+}));
+
+// 使用 JSON 中间件
+app.use(express.json());
 
 // MongoDB 连接
-const uri = 'mongodb+srv://zongyuwu97:pNuh2yzOKvsXa8D0@final.qgzb33l.mongodb.net/'; // 替换为你的 MongoDB URI
+const uri = process.env.MONGODB_URI; // 使用环境变量
 const client = new MongoClient(uri);
 let databases = {};
 
@@ -26,9 +40,6 @@ async function connectToDatabase() {
         process.exit(1); // 如果无法连接数据库，退出进程
     }
 }
-
-// 中间件
-app.use(express.json());
 
 // 测试 API
 app.get('/test', (req, res) => {
@@ -149,7 +160,6 @@ app.post('/libraries', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
-
 
 // 启动服务器
 app.listen(port, async () => {
