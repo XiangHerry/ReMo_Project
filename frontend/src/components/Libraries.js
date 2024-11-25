@@ -11,6 +11,9 @@ function Libraries() {
   }); // 新增记录的数据
   const [showResults, setShowResults] = useState(false); // 控制搜索结果是否展示
 
+  // 从环境变量获取 API 基础 URL
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+
   // 搜索函数
   const searchLibraries = () => {
     if (!searchQuery.trim()) {
@@ -18,7 +21,7 @@ function Libraries() {
       return;
     }
     axios
-      .get("http://localhost:5001/libraries", { params: { name: searchQuery } })
+      .get(`${API_BASE_URL}/libraries`, { params: { name: searchQuery } })
       .then((response) => {
         setLibraries(response.data); // 更新搜索结果
         setShowResults(true); // 展示搜索结果
@@ -33,7 +36,7 @@ function Libraries() {
       return;
     }
     axios
-      .post("http://localhost:5001/libraries", {
+      .post(`${API_BASE_URL}/libraries`, {
         name: newLibrary.name,
         address: newLibrary.address,
         books: newLibrary.books.split(",").map((book) => book.trim()), // 将书籍字符串拆分为数组
@@ -86,7 +89,7 @@ function Libraries() {
           ))}
         </ul>
       ) : showResults && libraries.length === 0 ? (
-        <p style={styles.noResult}>No libraries found for your search.</p> // 搜索为空时的提示
+        <p style={styles.noResult}>No libraries found for your search.</p> {/* 搜索为空时的提示 */}
       ) : null}
 
       {/* 添加新记录功能 */}

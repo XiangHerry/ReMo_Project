@@ -10,6 +10,7 @@ function Books() {
     isbn: "",
     authors: "",
   });
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
 
   // 搜索函数
   const handleSearch = () => {
@@ -18,7 +19,7 @@ function Books() {
       return;
     }
     axios
-      .get("http://localhost:5001/books", { params: { title: searchQuery } })
+      .get(`${API_BASE_URL}/books`, { params: { title: searchQuery } })
       .then((response) => {
         setBooks(response.data); // 更新搜索结果
         setShowResults(true); // 显示搜索结果
@@ -33,7 +34,7 @@ function Books() {
       return;
     }
     axios
-      .post("http://localhost:5001/books", {
+      .post(`${API_BASE_URL}/books`, {
         title: newBook.title,
         isbn: newBook.isbn.split(",").map((isbn) => isbn.trim()),
         authors: newBook.authors.split(",").map((author) => author.trim()),
