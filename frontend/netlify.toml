@@ -1,3 +1,10 @@
+[build]
+  command = "npm install && npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "20.x"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
