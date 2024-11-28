@@ -27,6 +27,7 @@ function Books() {
     axios
       .get(`${API_BASE_URL}/books`, { params: { title: searchQuery } })
       .then((response) => {
+        console.log("Fetched books:", response.data); // 添加日志
         setBooks(response.data); // 更新搜索结果
         setShowResults(true); // 显示搜索结果
       })
@@ -56,6 +57,7 @@ function Books() {
 
   // 删除书籍函数
   const deleteBook = (id) => {
+    console.log("Deleting book with ID:", id); // 添加日志
     if (window.confirm("Are you sure you want to delete this book?")) {
       axios
         .delete(`${API_BASE_URL}/books/${id}`)
@@ -63,12 +65,16 @@ function Books() {
           alert("Book deleted successfully!");
           setBooks(books.filter((book) => book._id !== id)); // 更新本地书籍列表
         })
-        .catch((error) => console.error("Error deleting book:", error));
+        .catch((error) => {
+          console.error("Error deleting book:", error);
+          alert("Failed to delete the book."); // 添加错误提示
+        });
     }
   };
 
   // 启动编辑模式
   const startEditing = (book) => {
+    console.log("Starting to edit book:", book); // 添加日志
     setEditingBookId(book._id);
     setEditedBook({
       title: book.title,
@@ -85,6 +91,7 @@ function Books() {
 
   // 提交编辑
   const submitEdit = (id) => {
+    console.log("Updating book with ID:", id); // 添加日志
     if (!editedBook.title || !editedBook.isbn || !editedBook.authors) {
       alert("Please fill in all fields before updating the book!");
       return;
@@ -113,7 +120,10 @@ function Books() {
         );
         cancelEditing();
       })
-      .catch((error) => console.error("Error updating book:", error));
+      .catch((error) => {
+        console.error("Error updating book:", error);
+        alert("Failed to update the book."); // 添加错误提示
+      });
   };
 
   return (
