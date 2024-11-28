@@ -1,7 +1,6 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
-const { ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5001; // 使用环境变量中的端口，Render 会自动分配端口
 
@@ -56,6 +55,8 @@ app.get('/books', async (req, res) => {
         const query = title ? { title: { $regex: title, $options: "i" } } : {};
         const books = await collection.find(query).limit(title ? 0 : 10).toArray();
 
+        console.log(`Fetched ${books.length} books from database`);
+
         res.json(books.map(book => ({
             _id: book._id.toString(), // 添加 _id 并转换为字符串
             title: book.title || "Unknown Title",
@@ -63,11 +64,10 @@ app.get('/books', async (req, res) => {
             authors: book.authors || [],
         })));
     } catch (err) {
+        console.error("Error fetching books:", err);
         res.status(500).send(err.message);
     }
 });
-
-
 
 // 添加新书
 app.post('/books', async (req, res) => {
@@ -78,6 +78,7 @@ app.post('/books', async (req, res) => {
         }
         const collection = databases.bookDatabase.collection('books');
         const result = await collection.insertOne({ title, isbn, authors });
+        console.log(`Inserted book with _id: ${result.insertedId}`);
         res.status(201).json({
             _id: result.insertedId, 
             title,
@@ -85,100 +86,9 @@ app.post('/books', async (req, res) => {
             authors
         });
     } catch (err) {
+        console.error("Error adding book:", err);
         res.status(500).send(err.message);
     }
-});
-
-
-
-// 获取图书馆列表
-app.get('/libraries', async (req, res) => {
-    try {
-        const { name } = req.query;
-        const collection = databases.libraryDatabase.collection('libraries');
-
-        // 构造查询逻辑
-        const query = name ? { title: { $regex: name, $options: "i" } } : {};
-        const libraries = await collection.find(query).limit(name ? 0 : 10).toArray();
-
-        res.json(libraries.map(library => ({
-            title: library.title || "No Title Available",
-            material_type: library.material_type || "Unknown",
-            inventory: library.inventory
-                ? {
-                    total_copies: library.inventory.total_copies || 0,
-                    copies_available: library.inventory.copies_available || 0,
-                    copies_checked_out: library.inventory.copies_checked_out || 0,
-                    copies_lost: library.inventory.copies_lost || 0,
-                }
-                : null,
-        })));
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
-
-// 添加新图书馆
-app.post('/libraries', async (req, res) => {
-    try {
-        const { title, material_type, inventory } = req.body;
-
-        // 校验必需字段
-        if (!title || !material_type || !inventory) {
-            return res.status(400).json({ message: "Missing required fields" });
-        }
-
-        // 确保 `inventory` 包含必要字段
-        const processedInventory = {
-            total_copies: inventory.total_copies || 0,
-            copies_available: inventory.copies_available || 0,
-            copies_checked_out: inventory.copies_checked_out || 0,
-            copies_lost: inventory.copies_lost || 0,
-        };
-
-        // 插入数据到数据库
-        const collection = databases.libraryDatabase.collection('libraries');
-        const result = await collection.insertOne({
-            title,
-            material_type,
-            inventory: processedInventory,
-        });
-
-        // 返回插入的数据
-        res.status(201).json({
-            _id: result.insertedId,
-            title,
-            material_type,
-            inventory: processedInventory,
-        });
-    } catch (err) {
-        console.error("Error adding library:", err);
-        res.status(500).send(err.message);
-    }
-});
-
-// 删除书籍
-app.delete('/books/:id', async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    // 验证 ID 是否为有效的 ObjectId
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid book ID" });
-    }
-
-    // 执行删除操作
-    const result = await databases.bookDatabase.collection('books').deleteOne({ _id: new ObjectId(id) });
-
-    if (result.deletedCount === 1) {
-      res.status(200).json({ message: "Book deleted successfully" });
-    } else {
-      res.status(404).json({ message: "Book not found" });
-    }
-  } catch (err) {
-    console.error("Error deleting book:", err);
-    res.status(500).send(err.message);
-  }
 });
 
 // 更新书籍
@@ -213,6 +123,164 @@ app.put('/books/:id', async (req, res) => {
         res.status(200).json({ message: "Book updated successfully" });
     } catch (err) {
         console.error("Error updating book:", err);
+        res.status(500).send(err.message);
+    }
+});
+
+// 删除书籍
+app.delete('/books/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // 验证 ID 是否为有效的 ObjectId
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid book ID" });
+        }
+
+        // 执行删除操作
+        const result = await databases.bookDatabase.collection('books').deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 1) {
+            console.log(`Deleted book with _id: ${id}`);
+            res.status(200).json({ message: "Book deleted successfully" });
+        } else {
+            res.status(404).json({ message: "Book not found" });
+        }
+    } catch (err) {
+        console.error("Error deleting book:", err);
+        res.status(500).send(err.message);
+    }
+});
+
+// 获取图书馆列表
+app.get('/libraries', async (req, res) => {
+    try {
+        const { name } = req.query;
+        const collection = databases.libraryDatabase.collection('libraries');
+
+        // 构造查询逻辑
+        const query = name ? { title: { $regex: name, $options: "i" } } : {};
+        const libraries = await collection.find(query).limit(name ? 0 : 10).toArray();
+
+        console.log(`Fetched ${libraries.length} libraries from database`);
+
+        res.json(libraries.map(library => ({
+            _id: library._id.toString(), // 添加 _id 并转换为字符串
+            title: library.title || "No Title Available",
+            material_type: library.material_type || "Unknown",
+            inventory: library.inventory
+                ? {
+                    total_copies: library.inventory.total_copies || 0,
+                    copies_available: library.inventory.copies_available || 0,
+                    copies_checked_out: library.inventory.copies_checked_out || 0,
+                    copies_lost: library.inventory.copies_lost || 0,
+                }
+                : null,
+        })));
+    } catch (err) {
+        console.error("Error fetching libraries:", err);
+        res.status(500).send(err.message);
+    }
+});
+
+// 添加新图书馆
+app.post('/libraries', async (req, res) => {
+    try {
+        const { title, material_type, inventory } = req.body;
+
+        // 校验必需字段
+        if (!title || !material_type || !inventory) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // 确保 `inventory` 包含必要字段
+        const processedInventory = {
+            total_copies: inventory.total_copies || 0,
+            copies_available: inventory.copies_available || 0,
+            copies_checked_out: inventory.copies_checked_out || 0,
+            copies_lost: inventory.copies_lost || 0,
+        };
+
+        // 插入数据到数据库
+        const collection = databases.libraryDatabase.collection('libraries');
+        const result = await collection.insertOne({
+            title,
+            material_type,
+            inventory: processedInventory,
+        });
+
+        console.log(`Inserted library with _id: ${result.insertedId}`);
+
+        // 返回插入的数据
+        res.status(201).json({
+            _id: result.insertedId,
+            title,
+            material_type,
+            inventory: processedInventory,
+        });
+    } catch (err) {
+        console.error("Error adding library:", err);
+        res.status(500).send(err.message);
+    }
+});
+
+// 更新图书馆
+app.put('/libraries/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { title, material_type, inventory } = req.body;
+
+        // 验证 ID 是否为有效的 ObjectId
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid library ID" });
+        }
+
+        // 校验必需字段
+        if (!title || !material_type || !inventory) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        const collection = databases.libraryDatabase.collection('libraries');
+
+        const updateResult = await collection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { title, material_type, inventory } }
+        );
+
+        if (updateResult.matchedCount === 0) {
+            return res.status(404).json({ message: "Library not found" });
+        }
+
+        console.log(`Updated library with _id: ${id}`);
+
+        res.status(200).json({ message: "Library updated successfully" });
+    } catch (err) {
+        console.error("Error updating library:", err);
+        res.status(500).send(err.message);
+    }
+});
+
+// 删除图书馆
+app.delete('/libraries/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // 验证 ID 是否为有效的 ObjectId
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid library ID" });
+        }
+
+        // 执行删除操作
+        const result = await databases.libraryDatabase.collection('libraries').deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 1) {
+            console.log(`Deleted library with _id: ${id}`);
+            res.status(200).json({ message: "Library deleted successfully" });
+        } else {
+            res.status(404).json({ message: "Library not found" });
+        }
+    } catch (err) {
+        console.error("Error deleting library:", err);
         res.status(500).send(err.message);
     }
 });
