@@ -1,7 +1,7 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
-
+const { ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5001; // 使用环境变量中的端口，Render 会自动分配端口
 
@@ -164,6 +164,30 @@ app.post('/libraries', async (req, res) => {
         console.error("Error adding library:", err);
         res.status(500).send(err.message);
     }
+});
+
+// 删除书籍
+app.delete('/books/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // 验证 ID 是否为有效的 ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid book ID" });
+    }
+
+    // 执行删除操作
+    const result = await databases.bookDatabase.collection('books').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 1) {
+      res.status(200).json({ message: "Book deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Book not found" });
+    }
+  } catch (err) {
+    console.error("Error deleting book:", err);
+    res.status(500).send(err.message);
+  }
 });
 
 // 启动服务器
