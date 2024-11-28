@@ -57,6 +57,7 @@ app.get('/books', async (req, res) => {
         const books = await collection.find(query).limit(title ? 0 : 10).toArray();
 
         res.json(books.map(book => ({
+            _id: book._id.toString(), // 添加 _id 并转换为字符串
             title: book.title || "Unknown Title",
             isbn: book.isbn || [],
             authors: book.authors || [],
@@ -65,6 +66,7 @@ app.get('/books', async (req, res) => {
         res.status(500).send(err.message);
     }
 });
+
 
 // 添加新书
 app.post('/books', async (req, res) => {
@@ -75,11 +77,17 @@ app.post('/books', async (req, res) => {
         }
         const collection = databases.bookDatabase.collection('books');
         const result = await collection.insertOne({ title, isbn, authors });
-        res.status(201).json(result.ops[0]);
+        res.status(201).json({
+            _id: result.insertedId, 
+            title,
+            isbn,
+            authors
+        });
     } catch (err) {
         res.status(500).send(err.message);
     }
 });
+
 
 // 获取创作者列表
 app.get('/creators', async (req, res) => {
