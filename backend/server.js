@@ -154,7 +154,12 @@ app.post('/libraries', async (req, res) => {
         });
 
         // 返回插入的数据
-        res.status(201).json(result.ops[0]);
+        res.status(201).json({
+            _id: result.insertedId,
+            title,
+            material_type,
+            inventory: processedInventory,
+        });
     } catch (err) {
         console.error("Error adding library:", err);
         res.status(500).send(err.message);

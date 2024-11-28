@@ -10,13 +10,6 @@ function Books() {
     isbn: "",
     authors: "",
   });
-  const [editingBookId, setEditingBookId] = useState(null); // 当前正在编辑的书籍ID
-  const [editedBook, setEditedBook] = useState({
-    title: "",
-    isbn: "",
-    authors: "",
-  });
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
 
   // 搜索函数
   const handleSearch = () => {
@@ -25,7 +18,7 @@ function Books() {
       return;
     }
     axios
-      .get(`${API_BASE_URL}/books`, { params: { title: searchQuery } })
+      .get("${window.location.origin}/.netlify/functions/books", { params: { title: searchQuery } })
       .then((response) => {
         setBooks(response.data); // 更新搜索结果
         setShowResults(true); // 显示搜索结果
@@ -40,7 +33,7 @@ function Books() {
       return;
     }
     axios
-      .post(`${API_BASE_URL}/books`, {
+      .post("${window.location.origin}/.netlify/functions/books", {
         title: newBook.title,
         isbn: newBook.isbn.split(",").map((isbn) => isbn.trim()),
         authors: newBook.authors.split(",").map((author) => author.trim()),
@@ -49,71 +42,8 @@ function Books() {
         alert("Book added successfully!");
         setNewBook({ title: "", isbn: "", authors: "" }); // 清空表单
         setShowResults(false); // 隐藏搜索结果
-        handleSearch(); // 重新搜索以显示新增书籍
       })
       .catch((error) => console.error("Error adding book:", error));
-  };
-
-  // 删除书籍函数
-  const deleteBook = (id) => {
-    if (window.confirm("Are you sure you want to delete this book?")) {
-      axios
-        .delete(`${API_BASE_URL}/books/${id}`)
-        .then(() => {
-          alert("Book deleted successfully!");
-          setBooks(books.filter((book) => book._id !== id)); // 更新本地书籍列表
-        })
-        .catch((error) => console.error("Error deleting book:", error));
-    }
-  };
-
-  // 启动编辑模式
-  const startEditing = (book) => {
-    setEditingBookId(book._id);
-    setEditedBook({
-      title: book.title,
-      isbn: book.isbn.join(", "),
-      authors: book.authors.join(", "),
-    });
-  };
-
-  // 取消编辑
-  const cancelEditing = () => {
-    setEditingBookId(null);
-    setEditedBook({ title: "", isbn: "", authors: "" });
-  };
-
-  // 提交编辑
-  const submitEdit = (id) => {
-    if (!editedBook.title || !editedBook.isbn || !editedBook.authors) {
-      alert("Please fill in all fields before updating the book!");
-      return;
-    }
-    axios
-      .put(`${API_BASE_URL}/books/${id}`, {
-        title: editedBook.title,
-        isbn: editedBook.isbn.split(",").map((isbn) => isbn.trim()),
-        authors: editedBook.authors.split(",").map((author) => author.trim()),
-      })
-      .then(() => {
-        alert("Book updated successfully!");
-        setBooks(
-          books.map((book) =>
-            book._id === id
-              ? {
-                  ...book,
-                  title: editedBook.title,
-                  isbn: editedBook.isbn.split(",").map((isbn) => isbn.trim()),
-                  authors: editedBook.authors
-                    .split(",")
-                    .map((author) => author.trim()),
-                }
-              : book
-          )
-        );
-        cancelEditing();
-      })
-      .catch((error) => console.error("Error updating book:", error));
   };
 
   return (
@@ -137,63 +67,11 @@ function Books() {
       {/* 显示搜索结果 */}
       {showResults && books.length > 0 ? (
         <ul style={styles.bookList}>
-          {books.map((book) => (
-            <li key={book._id} style={styles.bookItem}>
-              {editingBookId === book._id ? (
-                <div>
-                  <input
-                    type="text"
-                    value={editedBook.title}
-                    onChange={(e) =>
-                      setEditedBook({ ...editedBook, title: e.target.value })
-                    }
-                    style={styles.input}
-                  />
-                  <input
-                    type="text"
-                    value={editedBook.isbn}
-                    onChange={(e) =>
-                      setEditedBook({ ...editedBook, isbn: e.target.value })
-                    }
-                    style={styles.input}
-                  />
-                  <input
-                    type="text"
-                    value={editedBook.authors}
-                    onChange={(e) =>
-                      setEditedBook({ ...editedBook, authors: e.target.value })
-                    }
-                    style={styles.input}
-                  />
-                  <button
-                    onClick={() => submitEdit(book._id)}
-                    style={{ ...styles.button, marginRight: "10px" }}
-                  >
-                    Save
-                  </button>
-                  <button onClick={cancelEditing} style={styles.button}>
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <strong>Title:</strong> {book.title} <br />
-                  <strong>ISBN:</strong> {book.isbn.join(", ")} <br />
-                  <strong>Authors:</strong> {book.authors.join(", ")} <br />
-                  <button
-                    onClick={() => startEditing(book)}
-                    style={{ ...styles.button, marginRight: "10px" }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteBook(book._id)}
-                    style={styles.button}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
+          {books.map((book, index) => (
+            <li key={index} style={styles.bookItem}>
+              <strong>Title:</strong> {book.title} <br />
+              <strong>ISBN:</strong> {book.isbn.join(", ")} <br />
+              <strong>Authors:</strong> {book.authors.join(", ")} <br />
             </li>
           ))}
         </ul>
