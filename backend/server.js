@@ -68,6 +68,7 @@ app.get('/books', async (req, res) => {
 });
 
 
+
 // 添加新书
 app.post('/books', async (req, res) => {
     try {
@@ -89,24 +90,6 @@ app.post('/books', async (req, res) => {
 });
 
 
-// 获取创作者列表
-app.get('/creators', async (req, res) => {
-    try {
-        const { name } = req.query;
-        const collection = databases.creatorDatabase.collection('creators');
-
-        // 按名称搜索或返回默认记录
-        const query = name ? { name: { $regex: name, $options: "i" } } : {};
-        const creators = await collection.find(query).limit(name ? 0 : 10).toArray();
-
-        res.json(creators.map(creator => ({
-            name: creator.name || "Unknown Name",
-            works: creator.works || [],
-        })));
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
 
 // 获取图书馆列表
 app.get('/libraries', async (req, res) => {
@@ -196,6 +179,42 @@ app.delete('/books/:id', async (req, res) => {
     console.error("Error deleting book:", err);
     res.status(500).send(err.message);
   }
+});
+
+// 更新书籍
+app.put('/books/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { title, isbn, authors } = req.body;
+
+        // 验证 ID 是否为有效的 ObjectId
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid book ID" });
+        }
+
+        // 校验必需字段
+        if (!title || !isbn || !authors) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        const collection = databases.bookDatabase.collection('books');
+
+        const updateResult = await collection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { title, isbn, authors } }
+        );
+
+        if (updateResult.matchedCount === 0) {
+            return res.status(404).json({ message: "Book not found" });
+        }
+
+        console.log(`Updated book with _id: ${id}`);
+
+        res.status(200).json({ message: "Book updated successfully" });
+    } catch (err) {
+        console.error("Error updating book:", err);
+        res.status(500).send(err.message);
+    }
 });
 
 // 启动服务器
