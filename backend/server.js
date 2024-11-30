@@ -3,10 +3,15 @@ const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5001; // 使用环境变量中的端口，Render 会自动分配端口
+const dotenv = require('dotenv'); // 引入 dotenv
+dotenv.config(); // 加载环境变量
 
 // 使用 CORS 中间件
-const allowedOrigins = ['https://ephemeral-biscotti-5b60bd.netlify.app']; 
-app.use(cors({
+const allowedOrigins = [
+    'https://ephemeral-biscotti-5b60bd.netlify.app',
+    'http://localhost:3000' // 添加本地开发地址
+  ]; 
+  app.use(cors({
     origin: function(origin, callback){
         // 允许无来源（如 Postman）
         if(!origin) return callback(null, true);
