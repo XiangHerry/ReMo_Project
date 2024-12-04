@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 
 function Libraries() {
-  const [libraries, setLibraries] = useState([]); // 搜索结果
-  const [searchQuery, setSearchQuery] = useState(""); // 搜索关键词
-  const [showResults, setShowResults] = useState(false); // 控制是否显示搜索结果
+  const [libraries, setLibraries] = useState([]); // search res
+  const [searchQuery, setSearchQuery] = useState(""); // search keywords
+  const [showResults, setShowResults] = useState(false); // control to see if show search res
   const [newLibrary, setNewLibrary] = useState({
     title: "",
     material_type: "",
@@ -12,8 +12,8 @@ function Libraries() {
     copies_available: "",
     copies_checked_out: "",
     copies_lost: "",
-  }); // 新增记录的数据
-  const [editingLibraryId, setEditingLibraryId] = useState(null); // 当前正在编辑的图书馆ID
+  }); // added content
+  const [editingLibraryId, setEditingLibraryId] = useState(null); // current editing lib id
   const [editedLibrary, setEditedLibrary] = useState({
     title: "",
     material_type: "",
@@ -21,10 +21,10 @@ function Libraries() {
     copies_available: "",
     copies_checked_out: "",
     copies_lost: "",
-  }); // 编辑中的图书馆数据
+  }); // editing lib id
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
 
-  // 搜索函数
+  // search function
   const handleSearch = () => {
     if (!searchQuery.trim()) {
       alert("Please enter a valid search query!");
@@ -33,14 +33,14 @@ function Libraries() {
     axios
       .get(`${API_BASE_URL}/libraries`, { params: { name: searchQuery } })
       .then((response) => {
-        console.log("Fetched libraries:", response.data); // 添加日志
-        setLibraries(response.data); // 更新搜索结果
-        setShowResults(true); // 显示搜索结果
+        console.log("Fetched libraries:", response.data); // add log
+        setLibraries(response.data); // update search res
+        setShowResults(true); // show search res
       })
       .catch((error) => console.error("Error fetching libraries:", error));
   };
 
-  // 添加新图书馆函数
+  // add new lib function
   const addLibrary = () => {
     const { title, material_type, total_copies, copies_available, copies_checked_out, copies_lost } = newLibrary;
     if (!title || !material_type || !total_copies || !copies_available || !copies_checked_out || !copies_lost) {
@@ -67,33 +67,33 @@ function Libraries() {
           copies_available: "",
           copies_checked_out: "",
           copies_lost: "",
-        }); // 清空表单
-        setShowResults(false); // 隐藏搜索结果
-        handleSearch(); // 重新搜索以显示新增图书馆
+        }); // empty list
+        setShowResults(false); // hide search res
+        handleSearch(); // research to show new lib added
       })
       .catch((error) => console.error("Error adding library:", error));
   };
 
-  // 删除图书馆函数
+  // delete lib
   const deleteLibrary = (id) => {
-    console.log("Deleting library with ID:", id); // 添加日志
+    console.log("Deleting library with ID:", id); // add log
     if (window.confirm("Are you sure you want to delete this library?")) {
       axios
         .delete(`${API_BASE_URL}/libraries/${id}`)
         .then(() => {
           alert("Library deleted successfully!");
-          setLibraries(libraries.filter((library) => library._id !== id)); // 更新本地图书馆列表
+          setLibraries(libraries.filter((library) => library._id !== id)); // update local lib list
         })
         .catch((error) => {
           console.error("Error deleting library:", error);
-          alert("Failed to delete the library."); // 添加错误提示
+          alert("Failed to delete the library."); // add error warning
         });
     }
   };
 
-  // 启动编辑模式
+  // start editing mode
   const startEditing = (library) => {
-    console.log("Starting to edit library:", library); // 添加日志
+    console.log("Starting to edit library:", library); // add log
     setEditingLibraryId(library._id);
     setEditedLibrary({
       title: library.title,
@@ -105,7 +105,7 @@ function Libraries() {
     });
   };
 
-  // 取消编辑
+  // cancel editing
   const cancelEditing = () => {
     setEditingLibraryId(null);
     setEditedLibrary({
@@ -118,9 +118,9 @@ function Libraries() {
     });
   };
 
-  // 提交编辑
+  // submit editing
   const submitEdit = (id) => {
-    console.log("Updating library with ID:", id); // 添加日志
+    console.log("Updating library with ID:", id); // add log
     const { title, material_type, total_copies, copies_available, copies_checked_out, copies_lost } = editedLibrary;
     if (!title || !material_type || !total_copies || !copies_available || !copies_checked_out || !copies_lost) {
       alert("Please fill in all fields before updating the library!");
@@ -160,7 +160,7 @@ function Libraries() {
       })
       .catch((error) => {
         console.error("Error updating library:", error);
-        alert("Failed to update the library."); // 添加错误提示
+        alert("Failed to update the library."); // add warning alert
       });
   };
 
@@ -168,13 +168,13 @@ function Libraries() {
     <div style={styles.container}>
       <h2 style={styles.title}>Libraries Management</h2>
 
-      {/* 搜索功能 */}
+      {/* search function  */}
       <div style={styles.searchContainer}>
         <input
           type="text"
           placeholder="Search by library title"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} // 更新搜索关键词
+          onChange={(e) => setSearchQuery(e.target.value)} // update search keywords
           style={styles.input}
         />
         <button onClick={handleSearch} style={styles.button}>
@@ -182,7 +182,7 @@ function Libraries() {
         </button>
       </div>
 
-      {/* 显示搜索结果 */}
+      {/* show search res */}
       {showResults && libraries.length > 0 ? (
         <ul style={styles.list}>
           {libraries.map((library) => (
@@ -289,7 +289,7 @@ function Libraries() {
         <p style={styles.noResult}>No libraries found for your search.</p>
       ) : null}
 
-      {/* 添加新记录功能 */}
+      {/* add new record */}
       <h3 style={styles.subtitle}>Add a New Library</h3>
       <div style={styles.formContainer}>
         <input
@@ -342,7 +342,7 @@ function Libraries() {
   );
 }
 
-// 样式
+// style
 const styles = {
   container: {
     maxWidth: "800px",
