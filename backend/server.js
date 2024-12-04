@@ -12,8 +12,19 @@ const allowedOrigins = [
     'http://localhost:3000' 
   ]; 
   app.use(cors({
-    origin: allowedOrigins
+    origin: function(origin, callback){
+        console.log('Request Origin:', origin); // 添加日志
+        if(!origin) return callback(null, true);
+        if(allowedOrigins.includes(origin)){
+            return callback(null, true);
+        } else {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            console.log(msg); // 添加日志
+            return callback(new Error(msg), false);
+        }
+    }
 }));
+
 
 // Use JSON middleware
 app.use(express.json());
