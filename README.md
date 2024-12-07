@@ -6,6 +6,9 @@ The **Books & Libraries Management System** is a full-stack web application that
 ### Contact Email: xiang.che@northeastern.edu, xu.lulu@northeastern.edu
 ### Alternative Email: desperateherry@gmail.com, lulu.xu520520@gmail.com
 
+
+### ER Diagram: Can be referred to the link: https://github.com/XiangHerry/ReMo_Project/blob/master/github_link%26updated_ER_diagram.pdf
+
 ## Features
 
 ### Books Management
