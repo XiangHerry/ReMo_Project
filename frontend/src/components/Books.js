@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import axios from "axios";
 
 function Books() {
-  const [books, setBooks] = useState([]); // 搜索结果
-  const [searchQuery, setSearchQuery] = useState(""); // 搜索关键词
-  const [showResults, setShowResults] = useState(false); // 控制是否显示搜索结果
+  const [books, setBooks] = useState([]); // search res
+  const [searchQuery, setSearchQuery] = useState(""); // search keyword
+  const [showResults, setShowResults] = useState(false); // control whether search results are displayed
   const [newBook, setNewBook] = useState({
     title: "",
     isbn: "",
     authors: "",
   });
-  const [editingBookId, setEditingBookId] = useState(null); // 当前正在编辑的书籍ID
+  const [editingBookId, setEditingBookId] = useState(null); // current bookId 
   const [editedBook, setEditedBook] = useState({
     title: "",
     isbn: "",
@@ -18,7 +18,7 @@ function Books() {
   });
   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
 
-  // 搜索函数
+  // search function
   const handleSearch = () => {
     if (!searchQuery) {
       alert("Please enter a search query!");
@@ -27,14 +27,14 @@ function Books() {
     axios
       .get(`${API_BASE_URL}/books`, { params: { title: searchQuery } })
       .then((response) => {
-        console.log("Fetched books:", response.data); // 添加日志
-        setBooks(response.data); // 更新搜索结果
-        setShowResults(true); // 显示搜索结果
+        console.log("Fetched books:", response.data); // add log
+        setBooks(response.data); // update res
+        setShowResults(true); // show res
       })
       .catch((error) => console.error("Error fetching books:", error));
   };
 
-  // 添加新书函数
+  // add new book logic
   const addBook = () => {
     if (!newBook.title || !newBook.isbn || !newBook.authors) {
       alert("Please fill in all fields before adding a book!");
@@ -48,33 +48,33 @@ function Books() {
       })
       .then(() => {
         alert("Book added successfully!");
-        setNewBook({ title: "", isbn: "", authors: "" }); // 清空表单
-        setShowResults(false); // 隐藏搜索结果
-        handleSearch(); // 重新搜索以显示新增书籍
+        setNewBook({ title: "", isbn: "", authors: "" }); // empty list
+        setShowResults(false); // hide search res
+        handleSearch(); // search to show newly added books
       })
       .catch((error) => console.error("Error adding book:", error));
   };
 
-  // 删除书籍函数
+  // delete book logic
   const deleteBook = (id) => {
-    console.log("Deleting book with ID:", id); // 添加日志
+    console.log("Deleting book with ID:", id); // add log
     if (window.confirm("Are you sure you want to delete this book?")) {
       axios
         .delete(`${API_BASE_URL}/books/${id}`)
         .then(() => {
           alert("Book deleted successfully!");
-          setBooks(books.filter((book) => book._id !== id)); // 更新本地书籍列表
+          setBooks(books.filter((book) => book._id !== id)); //update local book list
         })
         .catch((error) => {
           console.error("Error deleting book:", error);
-          alert("Failed to delete the book."); // 添加错误提示
+          alert("Failed to delete the book."); // add false warning
         });
     }
   };
 
-  // 启动编辑模式
+  // initilize editing mode
   const startEditing = (book) => {
-    console.log("Starting to edit book:", book); // 添加日志
+    console.log("Starting to edit book:", book); // add log
     setEditingBookId(book._id);
     setEditedBook({
       title: book.title,
@@ -83,15 +83,15 @@ function Books() {
     });
   };
 
-  // 取消编辑
+  // cancel editing
   const cancelEditing = () => {
     setEditingBookId(null);
     setEditedBook({ title: "", isbn: "", authors: "" });
   };
 
-  // 提交编辑
+  // submit editing
   const submitEdit = (id) => {
-    console.log("Updating book with ID:", id); // 添加日志
+    console.log("Updating book with ID:", id); // add log
     if (!editedBook.title || !editedBook.isbn || !editedBook.authors) {
       alert("Please fill in all fields before updating the book!");
       return;
@@ -122,7 +122,7 @@ function Books() {
       })
       .catch((error) => {
         console.error("Error updating book:", error);
-        alert("Failed to update the book."); // 添加错误提示
+        alert("Failed to update the book."); // add error warning
       });
   };
 
@@ -130,7 +130,7 @@ function Books() {
     <div style={styles.container}>
       <h2 style={styles.title}>Books Management</h2>
 
-      {/* 搜索功能 */}
+      {/* search function */}
       <div style={styles.searchContainer}>
         <input
           type="text"
@@ -144,7 +144,7 @@ function Books() {
         </button>
       </div>
 
-      {/* 显示搜索结果 */}
+      {/* show search res */}
       {showResults && books.length > 0 ? (
         <ul style={styles.bookList}>
           {books.map((book) => (
@@ -211,7 +211,7 @@ function Books() {
         <p style={styles.noResult}>No books found for your search.</p>
       ) : null}
 
-      {/* 添加新书功能 */}
+      {/* add new book function */}
       <h3 style={styles.subtitle}>Add New Book</h3>
       <div style={styles.addBookContainer}>
         <input
@@ -243,7 +243,7 @@ function Books() {
   );
 }
 
-// 样式优化
+// style optimize
 const styles = {
   container: {
     maxWidth: "800px",

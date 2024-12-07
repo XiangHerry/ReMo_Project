@@ -13,13 +13,13 @@ const allowedOrigins = [
   ]; 
   app.use(cors({
     origin: function(origin, callback){
-        console.log('Request Origin:', origin); // 添加日志
+        console.log('Request Origin:', origin); 
         if(!origin) return callback(null, true);
         if(allowedOrigins.includes(origin)){
             return callback(null, true);
         } else {
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            console.log(msg); // 添加日志
+            console.log(msg); 
             return callback(new Error(msg), false);
         }
     }

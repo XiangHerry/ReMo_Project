@@ -2,6 +2,10 @@
 
 The **Books & Libraries Management System** is a full-stack web application that allows users to manage books and libraries efficiently. Users can perform Create, Read, Update, and Delete (CRUD) operations on both books and libraries. The system is built with a React frontend, an Express.js backend, and MongoDB for data storage.
 
+### Authors: Chenyi Xiang, Lulu Xu
+### Contact Email: xiang.che@northeastern.edu, xu.lulu@northeastern.edu
+### Alternative Email: desperateherry@gmail.com, lulu.xu520520@gmail.com
+
 ## Features
 
 ### Books Management
